@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>后室 BACKROOMS</title><meta name="color-scheme" content="dark"><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#000;color:#d9cf8a;font-family:"Noto Serif SC","Songti SC",serif;touch-action:none;overscroll-behavior:none}
+#c{position:fixed;inset:0;width:100%;height:100%}
+#fx,#hit{position:fixed;inset:0;pointer-events:none;opacity:0}
+#fx{background:radial-gradient(transparent 40%,#000a 100%);mix-blend-mode:multiply}
+#hit{background:radial-gradient(transparent 30%,#a00 120%);transition:opacity .4s}
+.ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0b0a05ee;z-index:10;padding:20px;text-align:center}
+.ov[hidden],#hud[hidden],#touch[hidden],#help[hidden]{display:none}
+h1{font-size:clamp(48px,14vw,110px);margin:0;letter-spacing:.3em;font-weight:900;color:#c9b44a;text-shadow:3px 0 #7a1010,-3px 0 #104a7a}
+.sub{max-width:34em;opacity:.7;margin:0 0 12px}
+button{font:inherit;color:#d9cf8a;background:#1b1807;border:1px solid #6b5f24;padding:12px 26px;min-width:220px;font-size:18px}
+button:active{background:#3a3210}
+#help{max-width:36em;font-size:14px;line-height:1.7;display:flex;flex-direction:column;gap:8px}
+#help p{margin:0;text-align:left}
+#hud{position:fixed;inset:0;pointer-events:none;font-size:13px;text-shadow:0 0 4px #000}
+#bars{position:absolute;left:max(10px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));display:flex;flex-direction:column;gap:3px;width:130px}
+#bars i{font-style:normal;display:flex;align-items:center;gap:6px;justify-content:space-between}
+#bars b{display:block;width:80px;height:6px;background:#2228;position:relative}
+#bars b:after{content:"";position:absolute;inset:0;width:var(--v,100%);background:var(--c,#c9b44a)}
+#info{position:absolute;right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));text-align:right;max-width:46vw}
+#prompt{position:absolute;left:0;right:0;top:58%;text-align:center;font-size:16px}
+#toast{position:absolute;left:0;right:0;top:22%;text-align:center;font-size:18px;opacity:0;transition:opacity .5s}
+#quick{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:12px;opacity:.8;white-space:nowrap}
+#touch{position:fixed;inset:0;z-index:5;pointer-events:none}
+#chase{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(transparent 35%,#900 130%);transition:opacity .3s}
+#mm{display:block;margin:6px 0 0 auto;width:min(110px,24vh);height:min(110px,24vh);background:#0009;border:1px solid #6b5f24}
+#arrow{display:none;color:#6c6;font-size:18px;font-weight:900;text-shadow:0 0 6px #4c4}
+#joy{position:absolute;left:max(24px,env(safe-area-inset-left));bottom:calc(30px + env(safe-area-inset-bottom,0px));width:130px;height:130px;border-radius:50%;border:2px solid #c9b44a66;background:#0004;pointer-events:auto}
+#knob{position:absolute;left:35px;top:35px;width:60px;height:60px;border-radius:50%;background:#c9b44a77}
+#btns{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(3,54px);gap:8px;pointer-events:none}
+#btns button{pointer-events:auto;min-width:0;width:54px;height:54px;padding:0;border-radius:50%;opacity:.55;font-size:16px}
+#inv{align-items:stretch;max-width:420px;margin:auto;font-size:15px}
+#inv{width:min(92vw,480px);max-height:86vh;overflow:auto;background:#0b0a05f2;border:1px solid #76672a}
+#inv h2{margin:0 0 4px;color:#d9c45a;font-size:28px}
+#inv .invhint{font-size:12px;opacity:.65;margin:0 0 8px}
+#invl{display:flex;flex-direction:column;gap:7px;width:100%;max-height:48vh;overflow:auto}
+.invrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:10px;background:#211e10;border:1px solid #554a20;text-align:left}
+.invrow strong{display:block;color:#e6d68c}
+.invrow small{display:block;opacity:.65;font-size:11px;margin-top:3px}
+.invrow .count{font-size:14px;white-space:nowrap}
+.invrow button{min-width:64px;padding:7px 10px;font-size:13px}
+.invrow button:disabled{opacity:.25}
+#inv .invactions{display:flex;gap:8px;width:100%;margin-top:5px}
+#inv .invactions button{flex:1;min-width:0}
+
+#menu{background:linear-gradient(#0b0a05aa,#0b0a05dd),url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5MDAgMTIwMCIgd2lkdGg9IjkwMCIgaGVpZ2h0PSIxMjAwIj4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ2wiIHgxPSIwIiB4Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZDljNDVhIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiM4YTc2MzAiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxYzE4MDkiLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyIiB4MT0iMSIgeDI9IjAiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2Q5YzQ1YSIvPjxzdG9wIG9mZnNldD0iLjU1IiBzdG9wLWNvbG9yPSIjOGE3NjMwIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMWMxODA5Ii8+PC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJnZiIgeDE9IjAiIHkxPSIxIiB4Mj0iMCIgeTI9IjAiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzdkNmIyYyIvPjxzdG9wIG9mZnNldD0iLjciIHN0b3AtY29sb3I9IiMyYTIzMGQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwYzBhMDQiLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9ImdjIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjY2ZjYWIwIi8+PHN0b3Agb2Zmc2V0PSIuNiIgc3RvcC1jb2xvcj0iIzVkNTgzNiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzE0MTEwOCIvPjwvbGluZWFyR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0iZGsiIGN4PSI0NTAiIGN5PSI1MjUiIHI9IjIzMCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzAwMCIgc3RvcC1vcGFjaXR5PSIuOTUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMDAiIHN0b3Atb3BhY2l0eT0iMCIvPjwvcmFkaWFsR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0idmciIGN4PSI0NTAiIGN5PSI1NjAiIHI9Ijc2MCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iLjQ1IiBzdG9wLWNvbG9yPSIjMDAwIiBzdG9wLW9wYWNpdHk9IjAiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMDAiIHN0b3Atb3BhY2l0eT0iLjkyIi8+PC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJ0cCIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzA1MDQwMCIgc3RvcC1vcGFjaXR5PSIuOSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA1MDQwMCIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJidCIgeDE9IjAiIHkxPSIxIiB4Mj0iMCIgeTI9IjAiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzA1MDQwMCIgc3RvcC1vcGFjaXR5PSIuOTUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwNTA0MDAiIHN0b3Atb3BhY2l0eT0iMCIvPjwvbGluZWFyR3JhZGllbnQ+CjxmaWx0ZXIgaWQ9ImJsIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxNCIvPjwvZmlsdGVyPgo8ZmlsdGVyIGlkPSJiMiI+PGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMi41Ii8+PC9maWx0ZXI+CjxmaWx0ZXIgaWQ9Im4iPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIuODUiIG51bU9jdGF2ZXM9IjIiIHNlZWQ9IjQiLz48ZmVDb2xvck1hdHJpeCB2YWx1ZXM9IjAgMCAwIDAgLjggMCAwIDAgMCAuNzUgMCAwIDAgMCAuNSAwIDAgMCAuNTUgMCIvPjwvZmlsdGVyPgo8cGF0dGVybiBpZD0ic2wiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjEuMyIgZmlsbD0iIzAwMCIgb3BhY2l0eT0iLjIiLz48L3BhdHRlcm4+PC9kZWZzPgo8cmVjdCB3aWR0aD0iOTAwIiBoZWlnaHQ9IjEyMDAiIGZpbGw9IiMwNjA1MDAiLz4KPHBvbHlnb24gcG9pbnRzPSItMjM4LjksLTMxLjEgMTEzOC45LC0zMS4xIDUxOC45LDQ2NC45IDM4MS4xLDQ2NC45IiBmaWxsPSJ1cmwoI2djKSIgLz4KPHBvbHlnb24gcG9pbnRzPSItMjM4LjksMTIwOC45IDExMzguOSwxMjA4LjkgNTE4LjksNTg4LjkgMzgxLjEsNTg4LjkiIGZpbGw9InVybCgjZ2YpIiAvPgo8cG9seWdvbiBwb2ludHM9Ii0yMzguOSwtMzEuMSAtMjM4LjksMTIwOC45IDM4MS4xLDU4OC45IDM4MS4xLDQ2NC45IiBmaWxsPSJ1cmwoI2dsKSIgLz4KPHBvbHlnb24gcG9pbnRzPSIxMTM4LjksLTMxLjEgMTEzOC45LDEyMDguOSA1MTguOSw1ODguOSA1MTguOSw0NjQuOSIgZmlsbD0idXJsKCNncikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iLTIzOC45LC0zMS4xIC0yMzguOSwxMjA4LjkgLTc1LjQsMTA0NS40IC03NS40LDk5LjciIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjExMzguOSwtMzEuMSAxMTM4LjksMTIwOC45IDk3NS40LDEwNDUuNCA5NzUuNCw5OS43IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSItNzUuNCwxMDQ1LjQgOTc1LjQsMTA0NS40IDg3NC43LDk0NC43IDI1LjMsOTQ0LjciIGZpbGw9InJnYmEoMCwwLDAsLjE0KSIgLz4KPHBvbHlnb24gcG9pbnRzPSIyNS4zLDE4MC4zIDI1LjMsOTQ0LjcgOTMuNyw4NzYuMyA5My43LDIzNC45IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSI4NzQuNywxODAuMyA4NzQuNyw5NDQuNyA4MDYuMyw4NzYuMyA4MDYuMywyMzQuOSIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iOTMuNyw4NzYuMyA4MDYuMyw4NzYuMyA3NTYuOSw4MjYuOSAxNDMuMSw4MjYuOSIgZmlsbD0icmdiYSgwLDAsMCwuMTQpIiAvPgo8cG9seWdvbiBwb2ludHM9IjE0My4xLDI3NC41IDE0My4xLDgyNi45IDE4MC40LDc4OS42IDE4MC40LDMwNC4zIiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSI3NTYuOSwyNzQuNSA3NTYuOSw4MjYuOSA3MTkuNiw3ODkuNiA3MTkuNiwzMDQuMyIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMTgwLjQsNzg5LjYgNzE5LjYsNzg5LjYgNjkwLjMsNzYwLjMgMjA5LjcsNzYwLjMiIGZpbGw9InJnYmEoMCwwLDAsLjE0KSIgLz4KPHBvbHlnb24gcG9pbnRzPSIyMDkuNywzMjcuOCAyMDkuNyw3NjAuMyAyMzMuMiw3MzYuOCAyMzMuMiwzNDYuNiIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNjkwLjMsMzI3LjggNjkwLjMsNzYwLjMgNjY2LjgsNzM2LjggNjY2LjgsMzQ2LjYiIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjIzMy4yLDczNi44IDY2Ni44LDczNi44IDY0Ny41LDcxNy41IDI1Mi41LDcxNy41IiBmaWxsPSJyZ2JhKDAsMCwwLC4xNCkiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMjUyLjUsMzYyLjAgMjUyLjUsNzE3LjUgMjY4LjcsNzAxLjMgMjY4LjcsMzc1LjAiIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjY0Ny41LDM2Mi4wIDY0Ny41LDcxNy41IDYzMS4zLDcwMS4zIDYzMS4zLDM3NS4wIiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSIyNjguNyw3MDEuMyA2MzEuMyw3MDEuMyA2MTcuNiw2ODcuNiAyODIuNCw2ODcuNiIgZmlsbD0icmdiYSgwLDAsMCwuMTQpIiAvPgo8cG9seWdvbiBwb2ludHM9IjI4Mi40LDM4NS45IDI4Mi40LDY4Ny42IDI5NC4yLDY3NS44IDI5NC4yLDM5NS40IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSI2MTcuNiwzODUuOSA2MTcuNiw2ODcuNiA2MDUuOCw2NzUuOCA2MDUuOCwzOTUuNCIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMjk0LjIsNjc1LjggNjA1LjgsNjc1LjggNTk1LjUsNjY1LjUgMzA0LjUsNjY1LjUiIGZpbGw9InJnYmEoMCwwLDAsLjE0KSIgLz4KPHBvbHlnb24gcG9pbnRzPSIzMDQuNSw0MDMuNiAzMDQuNSw2NjUuNSAzMTMuNCw2NTYuNiAzMTMuNCw0MTAuNyIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNTk1LjUsNDAzLjYgNTk1LjUsNjY1LjUgNTg2LjYsNjU2LjYgNTg2LjYsNDEwLjciIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjMxMy40LDY1Ni42IDU4Ni42LDY1Ni42IDU3OC42LDY0OC42IDMyMS40LDY0OC42IiBmaWxsPSJyZ2JhKDAsMCwwLC4xNCkiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMzIxLjQsNDE3LjEgMzIxLjQsNjQ4LjYgMzI4LjQsNjQxLjYgMzI4LjQsNDIyLjciIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjU3OC42LDQxNy4xIDU3OC42LDY0OC42IDU3MS42LDY0MS42IDU3MS42LDQyMi43IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSIzMjguNCw2NDEuNiA1NzEuNiw2NDEuNiA1NjUuMiw2MzUuMiAzMzQuOCw2MzUuMiIgZmlsbD0icmdiYSgwLDAsMCwuMTQpIiAvPgo8cG9seWdvbiBwb2ludHM9IjMzNC44LDQyNy44IDMzNC44LDYzNS4yIDM0MC41LDYyOS41IDM0MC41LDQzMi40IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSI1NjUuMiw0MjcuOCA1NjUuMiw2MzUuMiA1NTkuNSw2MjkuNSA1NTkuNSw0MzIuNCIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMzQwLjUsNjI5LjUgNTU5LjUsNjI5LjUgNTU0LjQsNjI0LjQgMzQ1LjYsNjI0LjQiIGZpbGw9InJnYmEoMCwwLDAsLjE0KSIgLz4KPHBvbHlnb24gcG9pbnRzPSIzNDUuNiw0MzYuNSAzNDUuNiw2MjQuNCAzNTAuMyw2MTkuNyAzNTAuMyw0NDAuMyIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNTU0LjQsNDM2LjUgNTU0LjQsNjI0LjQgNTQ5LjcsNjE5LjcgNTQ5LjcsNDQwLjMiIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjM1MC4zLDYxOS43IDU0OS43LDYxOS43IDU0NS40LDYxNS40IDM1NC42LDYxNS40IiBmaWxsPSJyZ2JhKDAsMCwwLC4xNCkiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMzU0LjYsNDQzLjcgMzU0LjYsNjE1LjQgMzU4LjYsNjExLjQgMzU4LjYsNDQ2LjgiIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjU0NS40LDQ0My43IDU0NS40LDYxNS40IDU0MS40LDYxMS40IDU0MS40LDQ0Ni44IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSIzNTguNiw2MTEuNCA1NDEuNCw2MTEuNCA1MzcuOCw2MDcuOCAzNjIuMiw2MDcuOCIgZmlsbD0icmdiYSgwLDAsMCwuMTQpIiAvPgo8cG9seWdvbiBwb2ludHM9IjM2Mi4yLDQ0OS43IDM2Mi4yLDYwNy44IDM2NS41LDYwNC41IDM2NS41LDQ1Mi40IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSI1MzcuOCw0NDkuNyA1MzcuOCw2MDcuOCA1MzQuNSw2MDQuNSA1MzQuNSw0NTIuNCIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMzY1LjUsNjA0LjUgNTM0LjUsNjA0LjUgNTMxLjQsNjAxLjQgMzY4LjYsNjAxLjQiIGZpbGw9InJnYmEoMCwwLDAsLjE0KSIgLz4KPHBvbHlnb24gcG9pbnRzPSIzNjguNiw0NTQuOSAzNjguNiw2MDEuNCAzNzEuNSw1OTguNSAzNzEuNSw0NTcuMiIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNTMxLjQsNDU0LjkgNTMxLjQsNjAxLjQgNTI4LjUsNTk4LjUgNTI4LjUsNDU3LjIiIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjM3MS41LDU5OC41IDUyOC41LDU5OC41IDUyNS44LDU5NS44IDM3NC4yLDU5NS44IiBmaWxsPSJyZ2JhKDAsMCwwLC4xNCkiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMzc0LjIsNDU5LjQgMzc0LjIsNTk1LjggMzc2LjcsNTkzLjMgMzc2LjcsNDYxLjQiIGZpbGw9InJnYmEoNjAsNDUsNSwuMjIpIiAvPgo8cG9seWdvbiBwb2ludHM9IjUyNS44LDQ1OS40IDUyNS44LDU5NS44IDUyMy4zLDU5My4zIDUyMy4zLDQ2MS40IiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSIzNzYuNyw1OTMuMyA1MjMuMyw1OTMuMyA1MjAuOSw1OTAuOSAzNzkuMSw1OTAuOSIgZmlsbD0icmdiYSgwLDAsMCwuMTQpIiAvPgo8cG9seWdvbiBwb2ludHM9IjM3OS4xLDQ2My4yIDM3OS4xLDU5MC45IDM4MS4zLDU4OC43IDM4MS4zLDQ2NS4wIiBmaWxsPSJyZ2JhKDYwLDQ1LDUsLjIyKSIgLz4KPHBvbHlnb24gcG9pbnRzPSI1MjAuOSw0NjMuMiA1MjAuOSw1OTAuOSA1MTguNyw1ODguNyA1MTguNyw0NjUuMCIgZmlsbD0icmdiYSg2MCw0NSw1LC4yMikiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMjQzLjMsNDI3LjAgMjQzLjMsNzI2LjcgMjk1LjAsNjc1LjAgMjk1LjAsNDUwLjIiIGZpbGw9IiMwNTA0MDMiIHN0cm9rZT0iIzRhM2YxNCIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjxwb2x5Z29uIHBvaW50cz0iNTY5LjIsNDY2LjMgNTY5LjIsNjM5LjIgNTUwLjAsNjIwLjAgNTUwLjAsNDc1LjAiIGZpbGw9IiMwNTA0MDMiIHN0cm9rZT0iIzRhM2YxNCIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjxwb2x5Z29uIHBvaW50cz0iMzU4LjgsNDc5LjAgMzU4LjgsNjExLjIgMzY3LjMsNjAyLjcgMzY3LjMsNDgyLjgiIGZpbGw9IiMwNTA0MDMiIHN0cm9rZT0iIzRhM2YxNCIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjxwb2x5Z29uIHBvaW50cz0iLTIzOC45LDExMTIuNCAtMjM4LjksMTIwOC45IDM4MS4xLDU4OC45IDM4MS4xLDU3OS4yIiBmaWxsPSJyZ2JhKDAsMCwwLC4zNSkiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMTEzOC45LDExMTIuNCAxMTM4LjksMTIwOC45IDUxOC45LDU4OC45IDUxOC45LDU3OS4yIiBmaWxsPSJyZ2JhKDAsMCwwLC4zNSkiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMzM0LjMsMTg5LjMgNTY1LjcsMTg5LjMgNTM0LjcsMjc4LjAgMzY1LjMsMjc4LjAiIGZpbGw9IiNmZmYyYjAiIGZpbHRlcj0idXJsKCNibCkiIG9wYWNpdHk9Ii44Ii8+Cjxwb2x5Z29uIHBvaW50cz0iMzM0LjMsMTg5LjMgNTY1LjcsMTg5LjMgNTM0LjcsMjc4LjAgMzY1LjMsMjc4LjAiIGZpbGw9IiNmZmZiZTIiIC8+Cjxwb2x5Z29uIHBvaW50cz0iMzkwLjEsMzQ5LjAgNTA5LjksMzQ5LjAgNTAwLjMsMzc2LjIgMzk5LjcsMzc2LjIiIGZpbGw9IiNmZmYyYjAiIGZpbHRlcj0idXJsKCNibCkiIG9wYWNpdHk9Ii44Ii8+Cjxwb2x5Z29uIHBvaW50cz0iMzkwLjEsMzQ5LjAgNTA5LjksMzQ5LjAgNTAwLjMsMzc2LjIgMzk5LjcsMzc2LjIiIGZpbGw9IiNmZmZiZTIiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNDA5LjYsNDA0LjcgNDkwLjQsNDA0LjcgNDg1LjgsNDE3LjcgNDE0LjIsNDE3LjciIGZpbGw9IiMzYTM3MjAiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNDE5LjUsNDMzLjAgNDgwLjUsNDMzLjAgNDc3LjgsNDQwLjYgNDIyLjIsNDQwLjYiIGZpbGw9IiNmZmYyYjAiIGZpbHRlcj0idXJsKCNibCkiIG9wYWNpdHk9Ii44Ii8+Cjxwb2x5Z29uIHBvaW50cz0iNDE5LjUsNDMzLjAgNDgwLjUsNDMzLjAgNDc3LjgsNDQwLjYgNDIyLjIsNDQwLjYiIGZpbGw9IiNmZmZiZTIiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNDI1LjUsNDUwLjEgNDc0LjUsNDUwLjEgNDcyLjcsNDU1LjIgNDI3LjMsNDU1LjIiIGZpbGw9IiNmZmYyYjAiIGZpbHRlcj0idXJsKCNibCkiIG9wYWNpdHk9Ii44Ii8+Cjxwb2x5Z29uIHBvaW50cz0iNDI1LjUsNDUwLjEgNDc0LjUsNDUwLjEgNDcyLjcsNDU1LjIgNDI3LjMsNDU1LjIiIGZpbGw9IiNmZmZiZTIiIC8+Cjxwb2x5Z29uIHBvaW50cz0iNDI5LjEsNDYwLjIgNDcwLjksNDYwLjIgNDY5LjYsNDY0LjAgNDMwLjQsNDY0LjAiIGZpbGw9IiNmZmYyYjAiIGZpbHRlcj0idXJsKCNibCkiIG9wYWNpdHk9Ii44Ii8+Cjxwb2x5Z29uIHBvaW50cz0iNDI5LjEsNDYwLjIgNDcwLjksNDYwLjIgNDY5LjYsNDY0LjAgNDMwLjQsNDY0LjAiIGZpbGw9IiNmZmZiZTIiIC8+CjxyZWN0IHg9IjM4MS4xIiB5PSI0NjQuOSIgd2lkdGg9IjEzNy44IiBoZWlnaHQ9IjEyNC4wIiBmaWxsPSIjMDMwMjAxIi8+CjxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMTIwMCIgZmlsbD0idXJsKCNkaykiLz4KPGcgZmlsdGVyPSJ1cmwoI2IyKSIgZmlsbD0iI2ZmZiI+PGNpcmNsZSBjeD0iNDM2LjIiIGN5PSI1MjAuMCIgcj0iNC4yIi8+PGNpcmNsZSBjeD0iNDYzLjgiIGN5PSI1MjAuMCIgcj0iNC4yIi8+PC9nPgo8cGF0aCBkPSJNNDI5LjMgNTM1LjIgUTQ1MC4wIDU3MS4wIDQ3MC43IDUzNS4yIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWx0ZXI9InVybCgjYjIpIi8+CjxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMTIwMCIgZmlsbD0idXJsKCN2ZykiLz48cmVjdCB3aWR0aD0iOTAwIiBoZWlnaHQ9IjM2MCIgZmlsbD0idXJsKCN0cCkiLz48cmVjdCB5PSI4ODAiIHdpZHRoPSI5MDAiIGhlaWdodD0iMzIwIiBmaWxsPSJ1cmwoI2J0KSIvPgo8cmVjdCB3aWR0aD0iOTAwIiBoZWlnaHQ9IjEyMDAiIGZpbHRlcj0idXJsKCNuKSIgb3BhY2l0eT0iLjIyIi8+PHJlY3Qgd2lkdGg9IjkwMCIgaGVpZ2h0PSIxMjAwIiBmaWxsPSJ1cmwoI3NsKSIvPgo8L3N2Zz4=) center/cover no-repeat}
+</style></head><body>
+<canvas id="c"></canvas><div id="fx"></div><div id="hit"></div><div id="chase"></div>
+<div id="menu" class="ov"><h1>后室</h1><p class="sub">你从现实中失足坠落。这里没有出口，只有出口的传闻。</p>
+<button id="bNew">开始游戏</button><button id="bCont">继续游戏</button><button id="bHelp">设置与操作说明</button>
+<div id="help" hidden>
+<label>视角灵敏度 <input id="sens" type="range" min="1" max="10" value="5"></label>
+<label>主音量 <input id="vol" type="range" min="0" max="10" value="6"></label>
+<label>难度 <select id="dif"><option value="0.75">简单</option><option value="1" selected>普通</option><option value="1.3">困难</option></select></label>
+<label>渲染分辨率 <select id="qual"><option value="0.6">低</option><option value="1" selected>中</option><option value="1.5">高</option></select></label>
+<p>电脑：WASD移动 · 鼠标视角 · Shift冲刺 · Ctrl/C蹲下 · 空格跳跃 · E互动/拾取 · F手电筒 · 1喝杏仁水 2换电池 3吃能量棒 · Tab / I背包 · M小地图 · P/Esc暂停<br>手机：左摇杆移动，右半屏滑动转视角，右下按钮操作。<br>目标：找到钥匙，打开出口，进入下一层。</p></div></div>
+<div id="pause" class="ov" hidden><h1>已暂停</h1><button id="bRes">继续</button><button id="bSave">保存</button><button id="bMenu">主菜单</button></div>
+<div id="dead" class="ov" hidden><h1>你死了</h1><p id="dmsg"></p><button id="bRetry">从检查点复活</button><button id="bMenu2">主菜单</button></div>
+<div id="inv" class="ov" hidden><h2>随身背包</h2><p class="invhint">点击物品右侧的“使用”即可消耗物品；钥匙会在靠近出口时自动使用。</p><div id="invl"></div><div class="invactions"><button id="bInvX">返回游戏</button><button id="bInvSave">保存物品</button></div></div>
+<div id="hud" hidden>
+<div id="bars"><i>生命<b id="hp"></b></i><i>体力<b id="st"></b></i><i>理智<b id="san"></b></i><i>饥饿<b id="hun"></b></i><i>口渴<b id="thi"></b></i><i>电量<b id="bat"></b></i></div>
+<div id="info"><span id="lvl"></span><br><span id="quest"></span><br><span id="clock"></span> <span id="state"></span> <span id="arrow" title="出口方向">↑</span><canvas id="mm" width="110" height="110"></canvas></div>
+<div id="prompt"></div><div id="toast"></div><div id="quick"></div></div>
+<div id="touch" hidden><div id="joy"><div id="knob"></div></div>
+<div id="btns"><button data-k="jump">跳</button><button data-k="crouch">蹲</button><button data-k="sprint">冲</button><button data-k="use">E</button><button data-k="flash">灯</button><button data-k="inv">包</button><button data-k="map">图</button><button data-k="pause">Ⅱ</button></div></div>
+
+<script>// 工具：种子随机数、存档、音频
+const RNG=s=>()=>{s=Math.imul(s^s>>>15,s|1);s^=s+Math.imul(s^s>>>7,s|61);return((s^s>>>14)>>>0)/4294967296};
+const Save={k:'backrooms_v1',
+ get(){try{const d=JSON.parse(localStorage.getItem(this.k));return d&&typeof d.lvl==='number'&&d.inv?d:null}catch(e){return null}},
+ set(d){try{localStorage.setItem(this.k,JSON.stringify(d));return true}catch(e){return false}},
+ clear(){try{localStorage.removeItem(this.k)}catch(e){}}};
+const Sfx={ctx:null,vol:.6,
+ init(){if(this.ctx)return;try{const c=this.ctx=new(window.AudioContext||window.webkitAudioContext)();
+  if(c.resume)c.resume();this.master=c.createGain();this.master.gain.value=this.vol;this.master.connect(c.destination);
+  this.drones=[];[60,120.5].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.frequency.value=f;g.gain.value=.025/(i+1);o.connect(g);g.connect(this.master);o.start();this.drones.push(o)});
+  const o=c.createOscillator();this.pan=c.createPanner();this.pan.panningModel='HRTF';this.pan.refDistance=2;this.pan.maxDistance=30;this.eg=c.createGain();this.eg.gain.value=0;
+  o.type='triangle';o.frequency.value=48;o.connect(this.eg);this.eg.connect(this.pan);this.pan.connect(this.master);o.start()}catch(e){this.ctx=null}},
+ setVol(v){this.vol=v;if(this.master)this.master.gain.value=v},
+ tone(f,d=.15,t='sine',v=.2){if(!this.ctx)return;const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type=t;o.frequency.value=f;
+  g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.connect(g);g.connect(this.master);o.start();o.stop(c.currentTime+d)},
+ step(run){this.tone(run?90:70,.08,'square',run?.08:.04)},
+ pick(){this.tone(660,.12);setTimeout(()=>this.tone(880,.12),90)},
+ hurt(){this.tone(110,.3,'sawtooth',.3)},
+  beat(power=1){this.tone(55,.13,'sine',.22*power);setTimeout(()=>this.tone(46,.16,'sine',.17*power),145)},
+  setLevel(l){if(!this.ctx||!this.drones)return;const c=this.ctx,t=c.currentTime,
+   B=[60,50,45,55,58,40,35,42,38,48,52,44,62,46,66,36,70,57,34,30][l]||60,
+   N=[.004,.01,.03,.02,.005,.015,.01,.05,.03,.04,.02,.03,.015,.005,.02,.02,.03,.005,.04,.06][l]||0,
+   F=[400,500,900,700,400,300,300,600,250,1200,500,900,800,300,2000,500,400,300,350,200][l]||500;
+   const waves=['sawtooth','triangle','sine','square','triangle','sawtooth','sine','square','sawtooth','triangle','square','sine','triangle','sawtooth','square','triangle','sawtooth','sine','square','sawtooth'];
+   const ratios=[2.01,2.4,1.5,3.01,2.02,1.25,2.7,1.8,3.2,2.2,1.33,2.5,1.75,3.5,2.01,1.6,2.8,1.4,3.1,2.25];
+   this.drones.forEach((o,i)=>{o.type=waves[l]||'sawtooth';o.frequency.setTargetAtTime(B*(i?ratios[l]:1),t,1.5)});
+   if(!this.nz){const n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*2,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    n.buffer=b;n.loop=true;this.nf=c.createBiquadFilter();this.nf.type='lowpass';this.ng=c.createGain();this.ng.gain.value=0;n.connect(this.nf);this.nf.connect(this.ng);this.ng.connect(this.master);n.start();this.nz=n}
+   this.nf.frequency.setTargetAtTime(F,t,1.5);this.ng.gain.setTargetAtTime(N,t,1.5)},
+ scare(){this.tone(220,.6,'sawtooth',.25);this.tone(233,.6,'sawtooth',.25)},
+ listen(p,yaw){if(!this.ctx)return;try{const l=this.ctx.listener;if(l.positionX){l.positionX.value=p.x;l.positionZ.value=p.z;l.forwardX.value=-Math.sin(yaw);l.forwardZ.value=-Math.cos(yaw)}else{l.setPosition(p.x,0,p.z);l.setOrientation(-Math.sin(yaw),0,-Math.cos(yaw),0,1,0)}}catch(e){}},
+ entity(x,z,vol){if(!this.ctx)return;try{if(this.pan.positionX){this.pan.positionX.value=x;this.pan.positionZ.value=z}else this.pan.setPosition(x,0,z);this.eg.gain.value=vol}catch(e){}}};
+</script><script>// 层级配置 + 种子迷宫生成（保证出生点到出口连通）
+const CS=3,WH=3;
+const LEVELS=[
+ {name:'LEVEL 0：黄色迷宫',n:9,open:.14,wall:'#c9b44a',floor:'#6f5f2a',ceil:'#cfcdb4',fog:0x2a2410,fd:.055,amb:.7,flick:.3,ents:1,stripe:1,quest:'在黄色迷宫中寻找钥匙，打开绿色出口'},
+ {name:'LEVEL 1：宜居仓库',n:11,open:.4,wall:'#7f807c',floor:'#4a4a4a',ceil:'#2c2c2c',fog:0x0b0b0d,fd:.05,amb:.4,flick:.15,ents:2,stripe:0,quest:'穿过仓库货架，找到钥匙并离开'},
+ {name:'LEVEL 2：管道噩梦',n:12,open:.19,wall:'#53656a',floor:'#26383b',ceil:'#34464a',fog:0x102326,fd:.065,amb:.3,flick:.2,ents:2,stripe:0,quest:'在潮湿管道区找到钥匙，避开黑暗'},
+ {name:'LEVEL 3：发电站',n:12,open:.24,wall:'#665b43',floor:'#343027',ceil:'#29251e',fog:0x17140d,fd:.055,amb:.35,flick:.55,ents:2,stripe:1,quest:'穿过发电设施，找到出口钥匙'},
+ {name:'LEVEL 4：废弃办公室',n:13,open:.32,wall:'#85816b',floor:'#514d40',ceil:'#77715e',fog:0x242116,fd:.05,amb:.55,flick:.18,ents:2,stripe:0,quest:'在废弃办公室中寻找钥匙'},
+ {name:'LEVEL 5：恐怖旅馆',n:13,open:.27,wall:'#60463e',floor:'#332521',ceil:'#49342d',fog:0x1b100e,fd:.06,amb:.28,flick:.35,ents:3,stripe:0,quest:'探索旅馆走廊，找到钥匙并逃离'},
+ {name:'LEVEL 6：熄灯',n:12,open:.06,wall:'#2a2a2a',floor:'#151515',ceil:'#0a0a0a',fog:0x000000,fd:.08,amb:.07,flick:0,ents:3,stripe:0,quest:'依靠手电筒在黑暗中找到钥匙'},
+ {name:'LEVEL 7：淹没区',n:13,open:.22,wall:'#315c68',floor:'#173c49',ceil:'#234b56',fog:0x09232b,fd:.075,amb:.22,flick:.12,ents:2,stripe:0,quest:'穿过被水淹没的区域，找到出口钥匙'},
+ {name:'LEVEL 8：岩洞系统',n:14,open:.12,wall:'#51463d',floor:'#29231f',ceil:'#39302a',fog:0x100d0b,fd:.07,amb:.16,flick:.08,ents:3,stripe:0,quest:'在岩洞深处寻找钥匙，注意周围动静'},
+ {name:'LEVEL 9：黑暗郊区',n:14,open:.34,wall:'#454b4c',floor:'#252b2d',ceil:'#343b3d',fog:0x101719,fd:.045,amb:.25,flick:.2,ents:3,stripe:0,quest:'穿过空旷郊区，找到可以开启出口的钥匙'},
+ {name:'LEVEL 10：诡异农场',n:14,open:.2,wall:'#75633e',floor:'#40351e',ceil:'#5d5033',fog:0x211b0c,fd:.055,amb:.38,flick:.25,ents:3,stripe:0,quest:'探索农场迷宫，找到钥匙离开'},
+ {name:'LEVEL 11：无尽城',n:15,open:.48,wall:'#62666b',floor:'#34383c',ceil:'#4b5055',fog:0x171b20,fd:.04,amb:.42,flick:.12,ents:3,stripe:0,quest:'在无尽城市街区中寻找出口钥匙'},
+ {name:'LEVEL 12：玩具工厂',n:14,open:.3,wall:'#805c69',floor:'#49313b',ceil:'#694653',fog:0x24151d,fd:.05,amb:.45,flick:.3,ents:3,stripe:1,quest:'穿过废弃玩具工厂，找到钥匙'},
+ {name:'LEVEL 13：永恒图书馆',n:15,open:.36,wall:'#6c5b43',floor:'#3b3022',ceil:'#51432f',fog:0x1b160e,fd:.045,amb:.5,flick:.1,ents:3,stripe:0,quest:'在书架之间找到钥匙，前往出口'},
+ {name:'LEVEL 14：霓虹商场',n:15,open:.5,wall:'#66527a',floor:'#29243b',ceil:'#42375c',fog:0x171126,fd:.04,amb:.5,flick:.45,ents:3,stripe:1,quest:'穿过空无一人的商场，找到出口钥匙'},
+ {name:'LEVEL 15：地下停车场',n:15,open:.28,wall:'#555b60',floor:'#292d31',ceil:'#343a40',fog:0x101316,fd:.06,amb:.2,flick:.28,ents:4,stripe:1,quest:'在地下停车场中寻找钥匙并逃离'},
+ {name:'LEVEL 16：红色走廊',n:14,open:.1,wall:'#743d3d',floor:'#351d20',ceil:'#4c292c',fog:0x200b0d,fd:.07,amb:.24,flick:.5,ents:4,stripe:1,quest:'穿过红色走廊，找到唯一的出口钥匙'},
+ {name:'LEVEL 17：无声病院',n:15,open:.33,wall:'#82918b',floor:'#46534f',ceil:'#65736d',fog:0x1a2521,fd:.05,amb:.34,flick:.16,ents:4,stripe:0,quest:'探索废弃病院，找到钥匙并保持安静'},
+ {name:'LEVEL 18：坍塌地铁',n:15,open:.25,wall:'#55515a',floor:'#28252d',ceil:'#39343f',fog:0x121018,fd:.065,amb:.18,flick:.32,ents:4,stripe:1,quest:'穿过坍塌地铁站，找到通往下一层的钥匙'},
+ {name:'LEVEL 19：终末核心',n:16,open:.38,wall:'#625044',floor:'#241c19',ceil:'#382c27',fog:0x100a08,fd:.075,amb:.12,flick:.6,ents:5,stripe:1,quest:'抵达终末核心，找到最后一把钥匙并逃离后室'}
+ ];
+// 每层独有的环境规则：除了地图外，生存压力也会随关卡变化。
+const LEVEL_RULES=[
+ {name:'荧光灯噪声',hint:'灯光闪烁时尽量远离笑魇'},
+ {name:'货架迷向',hint:'冲刺消耗的体力略有增加'},
+ {name:'管道蒸汽',hint:'潮湿环境会加快口渴'},
+ {name:'电力泄漏',hint:'手电电量消耗加快'},
+ {name:'办公室压迫感',hint:'长时间奔跑会损失理智'},
+ {name:'旅馆饥饿感',hint:'饥饿值下降速度加快'},
+ {name:'绝对黑暗',hint:'手电熄灭时理智下降更快'},
+ {name:'深水压力',hint:'口渴值下降速度加快'},
+ {name:'洞穴回声',hint:'理智恢复速度降低'},
+ {name:'雨夜寒意',hint:'体力恢复速度降低'},
+ {name:'农场迷雾',hint:'饥饿值下降速度加快'},
+ {name:'城市噪声',hint:'奔跑更容易引来怪物'},
+ {name:'工厂粉尘',hint:'理智持续受到轻微影响'},
+ {name:'图书馆静默',hint:'蹲下移动更安全'},
+ {name:'霓虹干扰',hint:'手电电量消耗加快'},
+ {name:'停车场寒冷',hint:'体力恢复速度降低'},
+ {name:'红色警报',hint:'怪物追击更加积极'},
+ {name:'病院静音',hint:'尽量蹲下并避免奔跑'},
+ {name:'地铁坍塌',hint:'生命值会缓慢流失，及时补给'},
+ {name:'终末侵蚀',hint:'理智与电量都将受到持续压力'}
+];
+function tex(c,stripe,rep,kind){const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d');x.fillStyle=c;x.fillRect(0,0,128,128);
+ if(stripe){x.fillStyle='#0002';for(let i=0;i<128;i+=16)x.fillRect(i,0,6,128)}
+ for(let i=0;i<900;i++){x.fillStyle=Math.random()<.5?'#0000001a':'#ffffff10';x.fillRect(Math.random()*128,Math.random()*128,2,2)}
+ if(kind==='w'){
+   // 墙纸接缝、踢脚线、污渍与细小破损
+   x.fillStyle='#0004';x.fillRect(0,108,128,20);x.fillStyle='#ffffff18';x.fillRect(0,105,128,2);
+   x.fillStyle='#0003';x.fillRect(0,0,128,5);x.fillRect(63,0,2,105);
+   x.strokeStyle='#ffffff18';x.lineWidth=1;x.strokeRect(5,8,54,92);x.strokeRect(69,8,54,92);
+   x.fillStyle='#0002';for(let i=0;i<10;i++){const yy=12+i*9;x.fillRect(4,yy,2,1);x.fillRect(122,yy,2,1)}
+   for(let i=0;i<7;i++){const px=Math.random()*128,py=Math.random()*100,r=7+Math.random()*22,gr=x.createRadialGradient(px,py,0,px,py,r);gr.addColorStop(0,'#0006');gr.addColorStop(1,'#0000');x.fillStyle=gr;x.fillRect(px-r,py-r,r*2,r*2)}
+   x.strokeStyle='#0003';x.beginPath();x.moveTo(18,35);x.lineTo(24,43);x.lineTo(20,54);x.moveTo(92,72);x.lineTo(99,78);x.stroke();
+  }
+  if(kind==='f'){
+   // 地砖网格、磨损、污迹与零散刮痕
+   x.strokeStyle='#0005';x.lineWidth=2;x.strokeRect(0,0,128,128);
+   x.strokeStyle='#0003';x.lineWidth=1;x.beginPath();for(let q=32;q<128;q+=32){x.moveTo(q,0);x.lineTo(q,128);x.moveTo(0,q);x.lineTo(128,q)}x.stroke();
+   for(let i=0;i<26;i++){x.fillStyle=i%2?'#00000018':'#ffffff0c';x.fillRect(Math.random()*128,Math.random()*128,4+Math.random()*15,1+Math.random()*3)}
+   x.fillStyle='#0002';for(let i=0;i<8;i++){x.beginPath();x.ellipse(Math.random()*128,Math.random()*128,4+Math.random()*12,2+Math.random()*7,Math.random()*3,0,Math.PI*2);x.fill()}
+  }
+  if(kind==='c'){
+   x.strokeStyle='#0004';x.lineWidth=2;x.strokeRect(0,0,128,128);x.beginPath();
+   x.moveTo(64,0);x.lineTo(64,128);x.moveTo(0,64);x.lineTo(128,64);x.stroke();
+   x.fillStyle='#ffffff12';x.fillRect(4,4,56,3);x.fillRect(68,68,56,3)
+  }
+  const t=new THREE.CanvasTexture(k);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);return t}
+function bfs(g,S,a,b){ // a,b=[x,y] 返回路径格子数组
+ const q=[a],pr={};pr[a[1]*S+a[0]]=-1;
+ for(let h=0;h<q.length;h++){const[x,y]=q[h];if(x===b[0]&&y===b[1])break;
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const X=x+dx,Y=y+dy,id=Y*S+X;if(g[Y]&&g[Y][X]===0&&!(id in pr)){pr[id]=y*S+x;q.push([X,Y])}}}
+ const id=b[1]*S+b[0];if(!(id in pr))return null;const p=[];let c=id;while(c!==-1){p.push([c%S,Math.floor(c/S)]);c=pr[c]}return p.reverse()}
+function buildLevel(cfg,seed){
+ const r=RNG(seed),n=cfg.n,S=2*n+1,g=[];for(let i=0;i<S;i++)g.push(new Array(S).fill(1));
+ const st=[[1,1]];g[1][1]=0;
+ while(st.length){const[x,y]=st[st.length-1];
+  const nb=[[2,0],[-2,0],[0,2],[0,-2]].filter(([a,b])=>{const X=x+a,Y=y+b;return X>0&&Y>0&&X<S-1&&Y<S-1&&g[Y][X]}).sort(()=>r()-.5);
+  if(!nb.length){st.pop();continue}const[a,b]=nb[0];g[y+b/2][x+a/2]=0;g[y+b][x+a]=0;st.push([x+a,y+b])}
+ for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(g[y][x]&&r()<cfg.open&&((!g[y][x-1]&&!g[y][x+1])||(!g[y-1][x]&&!g[y+1][x])))g[y][x]=0;
+ const floors=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(!g[y][x])floors.push([x,y]);
+ const spawn=[1,1];let far=[1,1],fd=0;
+ for(const c of floors){const p=bfs(g,S,spawn,c);if(p&&p.length>fd){fd=p.length;far=c}}
+ const grp=new THREE.Group(),W=S*CS;
+ const walls=[];g.forEach((row,y)=>row.forEach((v,x)=>{if(v)walls.push([x,y])}));
+ const wm=new THREE.InstancedMesh(new THREE.BoxGeometry(CS,WH,CS),new THREE.MeshStandardMaterial({map:tex(cfg.wall,cfg.stripe,1,'w'),roughness:.95}),walls.length);
+ const m=new THREE.Matrix4();walls.forEach(([x,y],i)=>{m.setPosition(x*CS,WH/2,y*CS);wm.setMatrixAt(i,m)});grp.add(wm);
+ // 沿墙脚增加独立踢脚线，让走廊有真实的层次与接缝
+ const trim=[];
+ walls.forEach(([x,y])=>{
+  if(g[y-1]&&g[y-1][x]===0)trim.push([x*CS,.12,y*CS-CS/2+.045,0]);
+  if(g[y+1]&&g[y+1][x]===0)trim.push([x*CS,.12,y*CS+CS/2-.045,0]);
+  if(g[y][x-1]===0)trim.push([x*CS-CS/2+.045,.12,y*CS,Math.PI/2]);
+  if(g[y][x+1]===0)trim.push([x*CS+CS/2-.045,.12,y*CS,Math.PI/2]);
+ });
+ if(trim.length){
+  const tm=new THREE.InstancedMesh(new THREE.BoxGeometry(CS,.18,.09),new THREE.MeshStandardMaterial({color:cfg.wall,roughness:.8,metalness:.08}),trim.length);
+  trim.forEach(([x,y,z,rot],i)=>{m.makeRotationY(rot);m.setPosition(x,y,z);tm.setMatrixAt(i,m)});grp.add(tm);
+ }
+ const mk=(c,y,rot)=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(W,W),new THREE.MeshStandardMaterial({map:tex(c,0,S,rot<0?'f':'c'),roughness:1}));p.rotation.x=rot;p.position.set(W/2-CS/2,y,W/2-CS/2);grp.add(p)};
+ mk(cfg.floor,0,-Math.PI/2);mk(cfg.ceil,WH,Math.PI/2);
+ const lm=new THREE.MeshBasicMaterial({color:0xfff6c8}),lights=floors.filter(([x,y])=>x%3===0&&y%3===0);
+ const li=new THREE.InstancedMesh(new THREE.BoxGeometry(1.4,.06,.5),lm,lights.length||1);
+ lights.forEach(([x,y],i)=>{m.setPosition(x*CS,WH-.04,y*CS);li.setMatrixAt(i,m)});if(cfg.amb>.2)grp.add(li);
+ const ex=new THREE.Mesh(new THREE.BoxGeometry(1.6,2.4,.3),new THREE.MeshStandardMaterial({color:0x224422,emissive:0x114411}));ex.position.set(far[0]*CS,1.2,far[1]*CS);grp.add(ex);
+ const defs={water:[0x66ccee,'杏仁水'],battery:[0x44dd44,'电池'],bar:[0xdd8833,'能量棒'],key:[0xffd700,'钥匙']};
+ const spots=floors.filter(c=>(c[0]+c[1]>6)&&!(c[0]===far[0]&&c[1]===far[1])).sort(()=>r()-.5),items=[];
+ const kc=spots[0];items.push({t:'key',c:kc});
+ for(let i=1;i<=8;i++)items.push({t:['water','battery','bar','battery'][i%4],c:spots[i]});
+ items.forEach(it=>{const me=new THREE.Mesh(it.t==='key'?new THREE.TorusGeometry(.18,.06,8,12):new THREE.BoxGeometry(.25,.35,.25),new THREE.MeshStandardMaterial({color:defs[it.t][0],emissive:defs[it.t][0],emissiveIntensity:.5}));
+  it.x=it.c[0]*CS;it.z=it.c[1]*CS;me.position.set(it.x,.5,it.z);it.mesh=me;it.n=defs[it.t][1];grp.add(me)});
+ const dc=floors.filter(()=>r()<.12),dm=new THREE.InstancedMesh(new THREE.BoxGeometry(.5,.5,.5),new THREE.MeshStandardMaterial({color:cfg.wall,roughness:1}),dc.length||1);
+  dc.forEach(([x,y],i)=>{const q=.6+r()*1.1;m.compose(new THREE.Vector3(x*CS+(r()<.5?-1:1)*1.15,.25*q,y*CS+(r()<.5?-1:1)*1.15),new THREE.Quaternion().setFromEuler(new THREE.Euler(0,r()*6.28,0)),new THREE.Vector3(q,q,q));dm.setMatrixAt(i,m)});grp.add(dm);
+  return{g,S,floors,spawn,exit:far,exitMesh:ex,items,grp,lm}}
+</script><script>// 笑魇：巡逻 → 发现追击 → 搜索 → 回到巡逻。沿格子中心移动，不会穿墙。
+class Smiler{
+ constructor(L,cell,rng,lvl){this.L=L;this.rng=rng;this.x=cell[0]*CS;this.z=cell[1]*CS;this.state='patrol';this.path=[];this.t=0;this.last=null;this.seen=false;
+  const g=this.mesh=new THREE.Group(),em=new THREE.MeshBasicMaterial({color:[0xffffff,0xd9e6ff,0x9deeff,0xffc36b,0xb5ffbd,0xff7777,0x9b8cff,0x66ddff,0xd8c2a0,0xdddddd,0xe4d37a,0xaaccff,0xff77cc,0xe8d6b0,0x77ffff,0xbac4d0,0xff4444,0xc8ffdf,0x9999ff,0xffaa55][lvl]||0xffffff});
+  const bodyMat=new THREE.MeshStandardMaterial({color:[0x050505,0x111820,0x07191d,0x1c1307,0x11130d,0x1b0808,0x020208,0x06151a,0x17100b,0x090d0e,0x171307,0x080b10,0x190812,0x100d08,0x09051b,0x0b0d10,0x180506,0x0b1511,0x0c0918,0x170b04][lvl]||0x050505});
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(.6,12,10),bodyMat));
+  [-.2,.2].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.07,6,6),em);e.position.set(x,.15,.55);g.add(e)});
+  const m=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,16,Math.PI),em);m.rotation.z=Math.PI;m.position.set(0,-.05,.56);g.add(m);
+  const t=new THREE.Mesh(new THREE.TorusGeometry(.32,.035,6,16,Math.PI),em);t.position.set(0,-.12,.56);g.add(t);
+  g.position.set(this.x,1.3,this.z);L.grp.add(g)}
+ cellOf(x,z){return[Math.round(x/CS),Math.round(z/CS)]}
+ los(P){const dx=P.x-this.x,dz=P.z-this.z,d=Math.hypot(dx,dz);for(let s=0;s<d;s+=.6){const i=Math.round((this.x+dx*s/d)/CS),j=Math.round((this.z+dz*s/d)/CS);if(this.L.g[j][i])return false}return true}
+ goto(c){const p=bfs(this.L.g,this.L.S,this.cellOf(this.x,this.z),c);this.path=p?p.slice(1):[]}
+ update(dt,P,diff,game){
+  const dx=P.x-this.x,dz=P.z-this.z,d=Math.hypot(dx,dz),see=this.los(P)&&d<(P.crouch?8:14)*diff,hear=P.sprint&&d<10*diff;
+  const was=this.state;
+  if(see||hear){this.last=this.cellOf(P.x,P.z);this.state='chase';this.t=0}
+  else if(this.state==='chase'){this.state='search';this.t=6}
+  if(this.state==='search'){this.t-=dt;if(this.t<=0)this.state='patrol'}
+  if(was!=='chase'&&this.state==='chase'){Sfx.scare();game.toast('它发现你了')}
+  this.q=(this.q||0)-dt;
+  if(this.q<=0){this.q=.4;
+   if(this.state==='chase')this.goto(this.cellOf(P.x,P.z));
+   else if(this.state==='search'&&this.last&&!this.path.length)this.goto(this.last);
+   else if(this.state==='patrol'&&!this.path.length)this.goto(this.L.floors[Math.floor(this.rng()*this.L.floors.length)])}
+  let sp=this.state==='chase'?3.6:this.state==='search'?2.4:1.5;
+  const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),inBeam=P.light&&P.bat>0&&(-dx*fx-dz*fz)/Math.max(d,.01)>.8&&d<18;
+  if(inBeam)sp*=.4;this.lit=inBeam;
+  let tx,tz;
+  if(this.state==='chase'&&d<4&&this.los(P)){tx=P.x;tz=P.z}else if(this.path.length){tx=this.path[0][0]*CS;tz=this.path[0][1]*CS}
+  if(tx!==undefined){const ax=tx-this.x,az=tz-this.z,ad=Math.hypot(ax,az);if(ad<.15&&this.path.length)this.path.shift();else if(ad>.01){const s=Math.min(sp*dt,ad);this.x+=ax/ad*s;this.z+=az/ad*s}}
+  this.mesh.position.set(this.x,1.3+Math.sin(performance.now()/500)*.08,this.z);
+  this.mesh.rotation.y=Math.atan2(dx,dz);
+  this.mesh.visible=d<28;
+  if(d<1.3&&this.state==='chase'){game.hurt(30*dt*diff,'被笑魇抓住了');}
+  Sfx.entity(this.x,this.z,Math.max(0,.15*(1-d/25)));
+  if(d<12&&(this.los(P)))P.san=Math.max(0,P.san-(12-d)*.03*dt*diff)}
+ dispose(){this.L.grp.remove(this.mesh)}}
+</script><script>(()=>{
+// 等待 Three.js 成功加载后再初始化游戏。主 CDN 不可用时自动尝试备用地址。
+function loadThree(){
+ if(window.THREE)return Promise.resolve();
+ const urls=[
+  'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.128.0/three.min.js',
+  'https://unpkg.com/three@0.128.0/build/three.min.js'
+ ];
+ let index=0;
+ return new Promise((resolve,reject)=>{
+  const next=()=>{
+   if(window.THREE)return resolve();
+   if(index>=urls.length)return reject(new Error('Three.js 下载失败：请检查网络，或使用 Safari 打开已部署到 GitHub Pages 的游戏网页'));
+   const script=document.createElement('script');script.src=urls[index++];script.async=true;
+   let settled=false;const timer=setTimeout(()=>{if(!settled){settled=true;script.remove();next()}},9000);
+   script.onload=()=>{if(settled)return;settled=true;clearTimeout(timer);window.THREE?resolve():next()};
+   script.onerror=()=>{if(settled)return;settled=true;clearTimeout(timer);next()};
+   document.head.appendChild(script);
+  };next();
+ });
+}
+function showBootError(err){
+ console.error('游戏启动失败：',err);
+ const panel=document.createElement('div');panel.style.cssText='position:fixed;inset:0;z-index:9999;background:#090806;color:#eadb9a;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px;text-align:center;font:16px/1.7 sans-serif';
+ panel.innerHTML='<h2 style="color:#d7bd56">游戏启动失败</h2><p>3D 引擎没有成功加载，或浏览器阻止了游戏初始化。</p><p style="opacity:.7;font-size:13px">iPhone 请用 Safari 打开网页，不要停留在“文件”App 的预览页。建议把 HTML 上传到 GitHub Pages 后再访问；游戏需要联网加载 Three.js。</p><button id="bootRetry" style="padding:12px 24px;background:#30280e;color:#f2df8b;border:1px solid #8b7431;cursor:pointer">重新加载</button><p style="font-size:12px;opacity:.5">错误信息：'+String(err&&err.message||err)+'</p>';
+ document.body.appendChild(panel);panel.querySelector('#bootRetry').onclick=()=>location.reload();
+}
+function boot(){
+const $=id=>document.getElementById(id),T=THREE;
+const INV_N={water:'杏仁水',battery:'电池',bar:'能量棒',key:'钥匙'};
+let R,scene,cam,spot,amb,glow,L,ents=[],state='menu',lastT=0,stepT=0,saveT=0,toastT,flick=0,diff=1,seen=new Uint8Array(1),showMap=true,mmT=0,beatT=0;
+const P={x:0,z:0,yaw:0,pitch:0,jy:0,vy:0,hp:100,st:100,san:100,hun:100,thi:100,bat:100,crouch:false,sprint:false,light:true,time:0,lvl:0,seed:7,inv:{water:1,battery:1,bar:1,key:0},taken:[]};
+const K={},TC={mx:0,mz:0,sprint:false,crouch:false};
+const set={sens:5,vol:6,diff:1};
+const isTouch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
+
+function init(){
+ try{R=new T.WebGLRenderer({canvas:$('c'),antialias:false});}catch(e){document.body.innerHTML='<p style="padding:30px;color:#c9b44a">您的浏览器不支持 WebGL，无法运行本游戏。请更换 Chrome / Safari / Edge。</p>';return false}
+ resize();addEventListener('resize',resize);
+ cam=new T.PerspectiveCamera(75,1,.1,60);cam.rotation.order='YXZ';
+ spot=new T.SpotLight(0xfff2cc,2.2,24,.5,.6,1.2);cam.add(spot,spot.target);spot.target.position.set(0,0,-1);
+ amb=new T.AmbientLight(0xffffff,.5);glow=new T.PointLight(0xfff0b0,.6,12);cam.add(glow);
+ try{const s=JSON.parse(localStorage.getItem('br_set'));if(s){Object.assign(set,s);$('sens').value=set.sens;$('vol').value=set.vol;$('dif').value=String(set.diff);diff=+set.diff||1}}catch(e){}
+ $('bCont').disabled=!Save.get();$('bCont').style.opacity=Save.get()?1:.4;
+ return true}
+function resize(){if(!R)return;R.setPixelRatio(Math.min(devicePixelRatio,1.5)*parseFloat($('qual').value));R.setSize(innerWidth,innerHeight,false);if(cam){cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}}
+function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>t.style.opacity=0,2500)}
+function load(lvl,keepPos){
+ if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){(o.material.map)&&o.material.map.dispose();o.material.dispose()}})}
+ ents.forEach(e=>e.dispose());ents=[];
+ const cfg=LEVELS[lvl];P.lvl=lvl;scene=new T.Scene();scene.background=new T.Color(cfg.fog);scene.fog=new T.FogExp2(cfg.fog,cfg.fd);
+ L=buildLevel(cfg,P.seed*131+lvl);seen=new Uint8Array(L.S*L.S);Sfx.setLevel(lvl);scene.add(L.grp,cam);amb.intensity=cfg.amb;scene.add(amb);glow.intensity=cfg.amb*.8;
+ L.items.forEach((it,i)=>{if(P.taken.includes(i)){it.got=true;it.mesh.visible=false}});
+ if(!keepPos){P.x=L.spawn[0]*CS;P.z=L.spawn[1]*CS;P.yaw=0}
+ const rng=RNG(P.seed+lvl*7+Math.floor(P.time/60));
+ for(let i=0;i<cfg.ents;i++){const c=L.floors.filter(f=>Math.hypot(f[0]-L.spawn[0],f[1]-L.spawn[1])>8);ents.push(new Smiler(L,c[Math.floor(rng()*c.length)],rng,lvl))}
+ $('lvl').textContent=cfg.name;$('quest').textContent='任务：'+cfg.quest+'｜环境：'+LEVEL_RULES[lvl].name+'（'+LEVEL_RULES[lvl].hint+'）';toast(cfg.name+' · '+LEVEL_RULES[lvl].hint)}
+function solid(x,z){const i=Math.round(x/CS),j=Math.round(z/CS);return !L.g[j]||L.g[j][i]!==0}
+function blocked(x,z){const r=.3;return solid(x-r,z-r)||solid(x+r,z-r)||solid(x-r,z+r)||solid(x+r,z+r)}
+function start(fresh){
+ Sfx.init();Sfx.setVol(set.vol/10);if(Sfx.ctx&&Sfx.ctx.state==='suspended')Sfx.ctx.resume();
+ if(fresh){Save.clear();Object.assign(P,{hp:100,st:100,san:100,hun:100,thi:100,bat:100,time:0,lvl:0,seed:Date.now()%100000,taken:[],inv:{water:1,battery:1,bar:1,key:0},light:true});load(0)}
+ else{const s=Save.get();if(!s){toast('存档不存在或已损坏');return}Object.assign(P,s,{inv:{...s.inv}});load(P.lvl,true);if(blocked(P.x,P.z)){P.x=L.spawn[0]*CS;P.z=L.spawn[1]*CS}}
+ ['menu','pause','dead','inv'].forEach(i=>$(i).hidden=true);$('hud').hidden=false;$('touch').hidden=!isTouch;P.safe=3;
+ state='play';lastT=performance.now();if(!isTouch&&$('c').requestPointerLock){try{const lock=$('c').requestPointerLock();if(lock&&lock.catch)lock.catch(()=>toast('鼠标锁定未成功：点击游戏画面即可重新锁定'))}catch(e){toast('鼠标锁定不可用：点击游戏画面即可重新锁定')}}}
+function save(){const o={...P,inv:P.inv,taken:P.taken};if(Save.set(o))toast('已保存')}
+function pause(){if(state!=='play')return;state='pause';$('chase').style.opacity=0;$('pause').hidden=false;document.exitPointerLock&&document.exitPointerLock()}
+function resume(){$('pause').hidden=true;$('inv').hidden=true;state='play';lastT=performance.now();if(!isTouch&&$('c').requestPointerLock){try{const lock=$('c').requestPointerLock();if(lock&&lock.catch)lock.catch(()=>toast('鼠标锁定未成功：点击游戏画面即可重新锁定'))}catch(e){toast('鼠标锁定不可用：点击游戏画面即可重新锁定')}}}
+function openInventory(){if(state!=='play')return;state='pause';renderInv();$('inv').hidden=false;document.exitPointerLock&&document.exitPointerLock()}
+function hurt(d,why){if(state!=='play'||P.safe>0)return;P.hp-=d;P.why=why;$('hit').style.opacity=.9;setTimeout(()=>$('hit').style.opacity=0,150);if(Math.random()<.05)Sfx.hurt();if(P.hp<=0)die(why)}
+function die(why){state='dead';$('chase').style.opacity=0;$('dead').querySelector('h1').textContent='你死了';$('bRetry').textContent='从检查点复活';document.exitPointerLock&&document.exitPointerLock();$('dmsg').textContent=`死因：${why||'未知'}　生存 ${Math.floor(P.time)} 秒　所在：${LEVELS[P.lvl].name}　携带物品 ${Object.values(P.inv).reduce((a,b)=>a+b,0)} 件`;$('dead').hidden=false}
+function use(k){if(P.inv[k]<=0)return;
+ if(k==='water'){P.thi=Math.min(100,P.thi+40);P.san=Math.min(100,P.san+25)}
+ else if(k==='bar'){P.hun=Math.min(100,P.hun+35);P.st=100}
+ else if(k==='battery'){P.bat=100}else return;
+ P.inv[k]--;Sfx.pick();toast('使用了'+INV_N[k]);renderInv();hud()}
+function renderInv(){
+ const desc={water:'恢复口渴值，并少量恢复理智',battery:'为手电筒补充电量至 100%',bar:'恢复饥饿值，并补满体力',key:'关键道具：靠近绿色出口时自动消耗'};
+ $('invl').innerHTML=Object.keys(P.inv).map(k=>`<div class="invrow"><div><strong>${INV_N[k]}</strong><small>${desc[k]}</small></div><span class="count">× ${P.inv[k]}</span><button data-use="${k}" ${P.inv[k]<=0||k==='key'?'disabled':''}>${k==='key'?'关键物品':'使用'}</button></div>`).join('');
+ $('invl').querySelectorAll('[data-use]').forEach(b=>b.addEventListener('click',()=>use(b.dataset.use)));
+ $('quick').textContent=`[1]杏仁水×${P.inv.water}  [2]电池×${P.inv.battery}  [3]能量棒×${P.inv.bar}  钥匙×${P.inv.key}`;
+}
+function nearest(){let b=null,bd=1.9;L.items.forEach(it=>{if(it.got)return;const d=Math.hypot(it.x-P.x,it.z-P.z);if(d<bd){bd=d;b=it}});
+ const ed=Math.hypot(L.exit[0]*CS-P.x,L.exit[1]*CS-P.z);return b||(ed<2.2?'exit':null)}
+function interact(){const t=nearest();if(!t)return;
+ if(t==='exit'){if(P.inv.key>0){P.inv.key--;next()}else{toast('出口上锁了，需要钥匙');Sfx.tone(120,.2,'square')}return}
+ t.got=true;t.mesh.visible=false;P.taken.push(L.items.indexOf(t));P.inv[t.t]++;Sfx.pick();toast('拾取：'+t.n);renderInv();
+ if(t.t==='key')$('quest').textContent='任务：钥匙到手，前往出口（绿色门）'}
+function next(){
+ if(P.lvl+1>=LEVELS.length){state='dead';document.exitPointerLock&&document.exitPointerLock();$('dead').querySelector('h1').textContent='你逃出来了';$('bRetry').textContent='重新开始';$('dmsg').textContent=`你成功穿越全部 20 个关卡！生存 ${Math.floor(P.time)} 秒。你暂时逃离了后室。`;$('dead').hidden=false;Save.clear();return}
+ P.taken=[];load(P.lvl+1);save()}
+function update(dt){
+ P.time+=dt;P.safe=Math.max(0,(P.safe||0)-dt);
+ const run=(K.ShiftLeft||K.ShiftRight||TC.sprint),cr=(K.ControlLeft||K.KeyC||TC.crouch);
+ let mx=(K.KeyD?1:0)-(K.KeyA?1:0)+TC.mx,mz=(K.KeyW?1:0)-(K.KeyS?1:0)+TC.mz;
+ const ml=Math.hypot(mx,mz);if(ml>1){mx/=ml;mz/=ml}
+ P.crouch=!!cr;P.sprint=run&&ml>.1&&P.st>0&&!P.crouch&&P.thi>8&&!P.tired;
+ if(P.st<=0)P.tired=true;if(P.st>25)P.tired=false;
+ let sp=(P.crouch?1.6:P.sprint?5.5:3.2)*(P.thi<15?.7:1);
+ const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),rx=Math.cos(P.yaw),rz=-Math.sin(P.yaw);
+ const vx=(fx*mz+rx*mx)*sp*dt,vz=(fz*mz+rz*mx)*sp*dt;
+ if(!blocked(P.x+vx,P.z))P.x+=vx;if(!blocked(P.x,P.z+vz))P.z+=vz;
+ if((K.Space)&&P.jy<=0&&P.vy===0&&P.st>10){P.vy=4.2;P.st-=8}
+ if(P.jy>0||P.vy>0){P.vy-=12*dt;P.jy+=P.vy*dt;if(P.jy<=0){P.jy=0;P.vy=0;Sfx.tone(60,.1,'square',.1)}}
+ if(P.sprint)P.st=Math.max(0,P.st-14*dt);else P.st=Math.min(100,P.st+(P.hun<20?5:12)*dt);
+ if(ml>.1&&P.jy===0){stepT-=dt*(P.sprint?1.8:P.crouch?.5:1);if(stepT<=0){stepT=.5;Sfx.step(P.sprint)}}
+ P.hun=Math.max(0,P.hun-.05*dt);P.thi=Math.max(0,P.thi-.08*dt);
+ const dark=!(P.light&&P.bat>0)&&LEVELS[P.lvl].amb<.3;if(dark)P.san=Math.max(0,P.san-.25*dt);else P.san=Math.min(100,P.san+.02*dt);
+ if(P.hun<=0||P.thi<=0)hurt(.8*dt,P.thi<=0?'脱水':'饥饿');
+ if(P.light&&P.bat>0){P.bat=Math.max(0,P.bat-.45*dt)}
+ const cfg=LEVELS[P.lvl];
+ // 20层环境规则，效果保持轻量，避免让玩家无法正常通关。
+ if(P.lvl===1&&P.sprint)P.st=Math.max(0,P.st-2*dt);
+ if(P.lvl===2||P.lvl===7)P.thi=Math.max(0,P.thi-.035*dt);
+ if(P.lvl===3||P.lvl===14)P.bat=Math.max(0,P.bat-.18*dt);
+ if(P.lvl===4||P.lvl===12)P.san=Math.max(0,P.san-.055*dt);
+ if(P.lvl===5||P.lvl===10)P.hun=Math.max(0,P.hun-.025*dt);
+ if(P.lvl===6&&!(P.light&&P.bat>0))P.san=Math.max(0,P.san-.45*dt);
+ if(P.lvl===8)P.san=Math.max(0,P.san-.025*dt);
+ if((P.lvl===9||P.lvl===15)&&!P.sprint)P.st=Math.max(0,P.st-1.5*dt);
+ if(P.lvl===16&&ents.some(e=>e.state==='chase'))P.san=Math.max(0,P.san-.12*dt);
+ if(P.lvl===17&&P.sprint)P.san=Math.max(0,P.san-.08*dt);
+ if(P.lvl===18){P.hazardTick=(P.hazardTick||0)+dt;if(P.hazardTick>=1){P.hazardTick=0;hurt(.8,'地铁坍塌造成伤害')}}
+ if(P.lvl===19){P.san=Math.max(0,P.san-.08*dt);P.bat=Math.max(0,P.bat-.08*dt)}
+ flick=Math.random()<cfg.flick*dt?.15:flick-dt;
+ const on=P.light&&P.bat>0&&!(P.bat<20&&Math.random()<.1);spot.intensity=on?2.2:0;
+ L.lm.color.setHex(flick>0?0x555040:0xfff6c8);
+ const df=diff;ents.forEach(e=>e.update(dt,P,df,{toast,hurt}));
+  let cd=99;ents.forEach(e=>{if(e.state==='chase')cd=Math.min(cd,Math.hypot(e.x-P.x,e.z-P.z))});
+  const threat=cd<16?Math.max(0,Math.min(1,(16-cd)/14)):0;
+  $('chase').style.opacity=threat*(.28+.55*(.5+.5*Math.sin(P.time*9)));
+  $('hit').style.opacity=threat>.82?.12+.12*(.5+.5*Math.sin(P.time*13)):0;
+  beatT-=dt;if(cd<16&&beatT<=0){beatT=Math.max(.27,.95-threat*.66);Sfx.beat(.35+threat*1.5)}
+ L.items.forEach(it=>{if(!it.got){it.mesh.rotation.y+=dt;it.mesh.position.y=.5+Math.sin(P.time*2+it.x)*.08}});
+ // 相机
+ const h=P.crouch?1.0:1.6;cam.position.set(P.x,h+P.jy+(ml>.1&&P.jy===0?Math.sin(P.time*(P.sprint?14:8))*.03:0),P.z);
+ cam.rotation.set(P.pitch,P.yaw,0);Sfx.listen(P,P.yaw);markSeen();mmT-=dt;if(showMap&&mmT<=0){mmT=.1;drawMap()}
+ cam.fov=75+(P.san<30?Math.sin(P.time*3)*4:0)+(P.sprint?5:0);cam.updateProjectionMatrix();
+ $('fx').style.opacity=P.san<40?(40-P.san)/40:0;
+ saveT+=dt;if(saveT>20){saveT=0;save()}
+ hud()}
+function toggleMap(){showMap=!showMap;$('mm').style.display=showMap?'block':'none';toast(showMap?'小地图：开':'小地图：关')}
+function markSeen(){const cx=Math.round(P.x/CS),cy=Math.round(P.z/CS);for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++){const X=cx+i,Y=cy+j;if(X>=0&&Y>=0&&X<L.S&&Y<L.S)seen[Y*L.S+X]=1}}
+function drawMap(){const c=$('mm'),g=c.getContext('2d'),N=8,sz=c.width/(2*N+1),px=P.x/CS,pz=P.z/CS,cx=Math.round(px),cy=Math.round(pz),o=c.width/2;
+ g.clearRect(0,0,c.width,c.height);
+ for(let j=-N-1;j<=N+1;j++)for(let i=-N-1;i<=N+1;i++){const X=cx+i,Y=cy+j;if(X<0||Y<0||X>=L.S||Y>=L.S)continue;
+  const isEx=X===L.exit[0]&&Y===L.exit[1];if(!seen[Y*L.S+X]&&!(isEx&&P.inv.key>0))continue;
+  g.fillStyle=isEx?'#4c4':L.g[Y][X]?'#7a6c2a':'#2a260f';g.fillRect(o+(X-.5-px)*sz,o+(Y-.5-pz)*sz,sz+.5,sz+.5)}
+ g.save();g.translate(o,o);g.rotate(-P.yaw);g.fillStyle='#fff';g.beginPath();g.moveTo(0,-5);g.lineTo(4,4);g.lineTo(-4,4);g.closePath();g.fill();g.restore()}
+function arrowUpd(){const a=$('arrow');if(!L||P.inv.key<=0){a.style.display='none';return}
+ const dx=L.exit[0]*CS-P.x,dz=L.exit[1]*CS-P.z,fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),rx=Math.cos(P.yaw),rz=-Math.sin(P.yaw);
+ a.style.display='inline-block';a.style.transform=`rotate(${Math.atan2(dx*rx+dz*rz,dx*fx+dz*fz)}rad)`}
+function hud(){arrowUpd();const s=(id,v,c)=>{const e=$(id);e.style.setProperty('--v',Math.max(0,v)+'%');e.style.setProperty('--c',c)};
+ s('hp',P.hp,'#b33');s('st',P.st,'#c9b44a');s('san',P.san,'#8a6fd0');s('hun',P.hun,'#c98a3a');s('thi',P.thi,'#4a9bc9');s('bat',P.bat,'#9c9');
+ $('clock').textContent=`生存 ${Math.floor(P.time/60)}:${String(Math.floor(P.time%60)).padStart(2,'0')}`;
+ $('state').textContent=(P.crouch?'蹲下':P.sprint?'奔跑':'')+(P.tired?' 力竭':'');
+ const t=nearest();$('prompt').textContent=!t?'':t==='exit'?(P.inv.key?'[E] 用钥匙开门':'[E] 门锁着'):'[E] 拾取 '+t.n}
+function loop(now){requestAnimationFrame(loop);if(state!=='play'){lastT=now;return}
+ const dt=Math.min(.05,(now-lastT)/1000);lastT=now;try{update(dt)}catch(err){console.error(err)}R.render(scene,cam)}
+// 输入
+addEventListener('keydown',e=>{K[e.code]=true;if(state==='play'){
+ if(e.code==='KeyE')interact();if(e.code==='KeyF')P.light=!P.light;if(e.code==='KeyM')toggleMap();if(e.code==='KeyP')pause();
+ if(e.code==='Digit1')use('water');if(e.code==='Digit2')use('battery');if(e.code==='Digit3')use('bar');
+ if(e.code==='Tab'||e.code==='KeyI'){e.preventDefault();openInventory()}}
+ else if((e.code==='Tab'||e.code==='KeyI')&&!$('inv').hidden){e.preventDefault();resume()}
+ else if((e.code==='Escape'||e.code==='KeyP')&&state==='pause')resume();
+ if(['Space','ControlLeft'].includes(e.code))e.preventDefault()});
+addEventListener('keyup',e=>K[e.code]=false);
+addEventListener('mousemove',e=>{if(state==='play'&&(document.pointerLockElement||(e.buttons&1))){const s=set.sens*.0004;P.yaw-=e.movementX*s;P.pitch=Math.max(-1.4,Math.min(1.4,P.pitch-e.movementY*s))}});
+document.addEventListener('pointerlockchange',()=>{if(!isTouch&&state==='play'&&!document.pointerLockElement)pause()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
+// 触屏：摇杆 + 右半屏视角，多点触控按 identifier 区分
+let jid=null,lid=null,lx=0,ly=0;const joy=$('joy'),kn=$('knob');
+addEventListener('touchstart',e=>{for(const t of e.changedTouches){const r=joy.getBoundingClientRect();
+ if(jid===null&&t.clientX>=r.left-20&&t.clientX<=r.right+20&&t.clientY>=r.top-20&&t.clientY<=r.bottom+20){jid=t.identifier;jm(t)}
+ else if(lid===null&&t.clientX>innerWidth/2&&!t.target.closest('#btns')){lid=t.identifier;lx=t.clientX;ly=t.clientY}}},{passive:false});
+function jm(t){const r=joy.getBoundingClientRect(),cx=r.left+65,cy=r.top+65;let dx=t.clientX-cx,dy=t.clientY-cy;const d=Math.hypot(dx,dy),m=50;if(d>m){dx*=m/d;dy*=m/d}
+ kn.style.transform=`translate(${dx}px,${dy}px)`;TC.mx=dx/m;TC.mz=-dy/m;TC.sprint=Math.hypot(dx,dy)>m*.95}
+addEventListener('touchmove',e=>{if(state==='play')e.preventDefault();for(const t of e.changedTouches){
+ if(t.identifier===jid)jm(t);else if(t.identifier===lid){const s=set.sens*.0009;P.yaw-=(t.clientX-lx)*s;P.pitch=Math.max(-1.4,Math.min(1.4,P.pitch-(t.clientY-ly)*s));lx=t.clientX;ly=t.clientY}}},{passive:false});
+const te=e=>{for(const t of e.changedTouches){if(t.identifier===jid){jid=null;TC.mx=TC.mz=0;TC.sprint=false;kn.style.transform=''}if(t.identifier===lid)lid=null}};
+addEventListener('touchend',te);addEventListener('touchcancel',te);
+document.querySelectorAll('#btns button').forEach(b=>{const k=b.dataset.k;
+ b.addEventListener('pointerdown',e=>{e.preventDefault();if(state!=='play'&&k!=='pause')return;
+  if(k==='jump')K.Space=true;if(k==='crouch')TC.crouch=!TC.crouch;if(k==='sprint')TC.sprint=!TC.sprint;if(k==='use')interact();if(k==='flash')P.light=!P.light;
+  if(k==='inv'){openInventory()}if(k==='map')toggleMap();if(k==='pause')pause()});
+ ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{if(k==='jump')K.Space=false}))});
+$('c').addEventListener('click',()=>{if(state==='play'&&!isTouch&&!document.pointerLockElement){try{$('c').requestPointerLock()}catch(e){}}});
+// 菜单
+$('bNew').onclick=()=>{try{start(true)}catch(err){showBootError(err)}};$('bCont').onclick=()=>{try{start(false)}catch(err){showBootError(err)}};$('bHelp').onclick=()=>$('help').hidden=!$('help').hidden;
+$('bRes').onclick=resume;$('bSave').onclick=save;$('bInvX').onclick=resume;$('bInvSave').onclick=()=>{save();renderInv()};
+$('bMenu').onclick=$('bMenu2').onclick=()=>{state='menu';$('hud').hidden=true;$('touch').hidden=true;['pause','dead'].forEach(i=>$(i).hidden=true);$('menu').hidden=false;$('bCont').disabled=!Save.get();$('bCont').style.opacity=Save.get()?1:.4};
+$('bRetry').onclick=()=>{const s=Save.get();$('dead').hidden=true;if(s){start(false);P.hp=Math.max(P.hp,70);P.hun=Math.max(P.hun,35);P.thi=Math.max(P.thi,35);P.san=Math.max(P.san,40);P.bat=Math.max(P.bat,30)}else start(true)};
+const ss=()=>{set.sens=+$('sens').value;set.vol=+$('vol').value;set.diff=+$('dif').value;diff=set.diff;Sfx.setVol(set.vol/10);try{localStorage.setItem('br_set',JSON.stringify(set))}catch(e){}};
+$('sens').oninput=$('vol').oninput=$('dif').oninput=$('dif').onchange=ss;$('qual').onchange=resize;
+if(init()){renderInv();requestAnimationFrame(loop)}
+}
+loadThree().then(boot).catch(showBootError);
+})();
+</script></body></html>
